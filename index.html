@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Renqing Ledger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'china-red': '#8B0000',
+              'china-red-light': '#A52A2A',
+              'table-grey': '#A9A9A9',
+              'plate-white': '#F5F5F5',
+              'gold-coin': '#FFD700',
+              'gold-accent': '#D4AF37',
+            },
+            fontFamily: {
+              serif: ['"Noto Serif SC"', 'serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+      body {
+        background-color: #8B0000;
+        font-family: 'Noto Serif SC', serif;
+        overflow: hidden; /* Prevent scrolling on main view */
+      }
+      /* Custom scrollbar for drawers */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #2c0b0b;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #5c1818;
+        border-radius: 3px;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
