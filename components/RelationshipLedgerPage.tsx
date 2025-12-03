@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { ArrowLeft, FolderOpen, ArrowDownCircle, ArrowUpCircle, ExternalLink } from 'lucide-react';
 import { GiftEvent, TransactionType, Page } from '../types';
@@ -25,7 +24,7 @@ export const RelationshipLedgerPage: React.FC<RelationshipLedgerPageProps> = ({ 
   const people = Object.keys(groupedData).sort();
 
   return (
-    <div className="w-full h-full bg-[#B11414] flex flex-col relative overflow-hidden">
+    <div className="w-screen h-screen bg-[#B11414] flex flex-col relative overflow-hidden">
       
       {/* Top Header */}
       <div className="h-24 bg-[#951111] w-full flex items-center px-6 shadow-md z-20 shrink-0 border-b border-[#7a0e0e]">

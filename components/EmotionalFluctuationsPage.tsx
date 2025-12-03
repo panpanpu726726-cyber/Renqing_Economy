@@ -1,4 +1,3 @@
-
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft, Activity, TrendingUp, AlertTriangle, Share2, ArrowUpCircle, ArrowDownCircle, Banknote, Clock, Info, Zap, Skull } from 'lucide-react';
 import { GiftEvent, TransactionType } from '../types';
@@ -73,7 +72,7 @@ export const EmotionalFluctuationsPage: React.FC<EmotionalFluctuationsPageProps>
   };
 
   return (
-    <div className="w-full h-full bg-[#B11414] flex flex-col relative overflow-hidden font-serif text-white">
+    <div className="w-screen h-screen bg-[#B11414] flex flex-col relative overflow-hidden font-serif text-white">
       
       {/* Header */}
       <div className="h-24 bg-[#951111] w-full flex items-center px-6 shadow-md z-20 shrink-0 border-b border-[#7a0e0e]">
