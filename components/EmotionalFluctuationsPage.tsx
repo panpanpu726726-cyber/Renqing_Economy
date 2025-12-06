@@ -1,5 +1,6 @@
+
 import React, { useMemo, useState } from 'react';
-import { ArrowLeft, Activity, TrendingUp, AlertTriangle, Share2, ArrowUpCircle, ArrowDownCircle, Banknote, Clock, Info, Zap, Skull } from 'lucide-react';
+import { ArrowLeft, Activity, TrendingUp, AlertTriangle, Share2, ArrowUpCircle, ArrowDownCircle, Banknote, Clock, Info, Zap, Skull, X } from 'lucide-react';
 import { GiftEvent, TransactionType } from '../types';
 import { CATEGORIES, getCategory } from '../utils';
 
@@ -75,17 +76,18 @@ export const EmotionalFluctuationsPage: React.FC<EmotionalFluctuationsPageProps>
     <div className="w-screen h-screen bg-[#B11414] flex flex-col relative overflow-hidden font-serif text-white">
       
       {/* Header */}
-      <div className="h-24 bg-[#951111] w-full flex items-center px-6 shadow-md z-20 shrink-0 border-b border-[#7a0e0e]">
-        <button 
-          onClick={onBack}
-          className="text-white hover:bg-white/10 p-2 rounded-full transition-colors flex items-center gap-2 group"
-        >
-          <ArrowLeft size={28} className="group-hover:-translate-x-1 transition-transform"/>
-          <span className="font-serif font-bold text-lg tracking-wide">Back to Home</span>
-        </button>
-        <h1 className="ml-auto text-gold-coin font-serif font-bold text-2xl tracking-widest flex items-center gap-3">
+      <div className="h-24 bg-[#951111] w-full flex items-center px-6 shadow-md z-20 shrink-0 border-b border-[#7a0e0e] relative">
+        <h1 className="text-gold-coin font-serif font-bold text-2xl tracking-widest flex items-center gap-3">
           <Activity className="text-gold-coin" /> EMOTIONAL FLUCTUATIONS
         </h1>
+
+        {/* Close Button - Top Right */}
+        <button 
+          onClick={onBack}
+          className="absolute right-6 text-white/80 hover:text-white hover:rotate-90 transition-all p-2"
+        >
+          <X size={32} />
+        </button>
       </div>
 
       {/* Main Dashboard Content */}

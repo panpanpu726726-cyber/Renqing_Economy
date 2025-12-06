@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, Bell, Settings, Star, Coins, ChevronRight, ToggleLeft, ToggleRight } from 'lucide-react';
+import { X, Bell, Settings as SettingsIcon, Star, Banknote, ChevronRight, ToggleLeft, ToggleRight } from 'lucide-react';
 
 interface SettingsDrawerProps {
   isOpen: boolean;
@@ -10,139 +10,138 @@ interface SettingsDrawerProps {
 export const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ isOpen, onClose }) => {
   const [reminderEnabled, setReminderEnabled] = useState(true);
   const [rating, setRating] = useState(0);
+  const [showThankYou, setShowThankYou] = useState(false);
+  const [currency, setCurrency] = useState('CNY');
 
-  // Helper Card Component for Settings Items
-  const SettingCard = ({ icon, label, children, onClick }: any) => (
-    <div 
-        onClick={onClick}
-        className="bg-black/10 hover:bg-black/20 transition-colors border-b border-white/5 p-4 flex items-center justify-between group cursor-pointer"
-    >
-        <div className="flex items-center gap-3 text-white/90">
-            <span className="text-gold-coin opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all">
-                {icon}
-            </span>
-            <span className="font-serif font-bold text-sm tracking-wide group-hover:text-white transition-colors">
-                {label}
-            </span>
-        </div>
-        <div>
-            {children}
-        </div>
-    </div>
-  );
+  const handleRating = (score: number) => {
+    setRating(score);
+    setShowThankYou(true);
+    setTimeout(() => setShowThankYou(false), 2000);
+  };
 
   return (
     <>
       {/* Overlay */}
       <div 
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] transition-opacity duration-500 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] transition-opacity duration-500 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={onClose}
       />
       
-      {/* Drawer Container */}
-      <div className={`fixed top-0 left-0 h-full w-[350px] bg-[#cf1515] z-[70] shadow-[10px_0_40px_rgba(0,0,0,0.6)] transform transition-transform duration-500 cubic-bezier(0.25, 1, 0.5, 1) flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      {/* Drawer - "Open Red Envelope" Style */}
+      <div className={`fixed top-0 left-0 h-full w-80 bg-[#cf1515] z-[70] shadow-[10px_0_40px_rgba(0,0,0,0.6)] transform transition-transform duration-500 cubic-bezier(0.25, 1, 0.5, 1) ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
-        {/* --- Envelope Flap Header --- */}
-        <div className="relative w-full h-[240px] shrink-0 z-20">
-            {/* Flap Background */}
-            <div className="absolute inset-0 bg-[#ff5e57]"></div>
-            
-            {/* The Curve (Envelope Triangle) */}
-            <div className="absolute bottom-[-40px] left-0 w-full h-[80px] bg-[#ff5e57] rounded-b-[100%] shadow-md z-10"></div>
-            
-            {/* Close Button */}
-            <button 
-                onClick={onClose} 
-                className="absolute top-6 right-6 text-white/60 hover:text-white hover:rotate-90 transition-all z-50"
-            >
-                <X size={26} />
-            </button>
+        {/* --- Top Flap (Simulating an open envelope interior) --- */}
+        <div className="relative h-48 bg-[#b91c1c] overflow-hidden shrink-0">
+             {/* The inner lining pattern */}
+             <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-yellow-200 to-transparent"></div>
+             
+             {/* The "Open" Flap Shape (Triangle pointing up/out visually) */}
+             <div className="absolute -bottom-10 left-0 w-full h-20 bg-[#cf1515] rounded-t-[50%] shadow-[0_-5px_15px_rgba(0,0,0,0.2)]"></div>
 
-            {/* Header Content */}
-            <div className="relative z-50 p-8 pt-12 text-center">
-                <div className="w-16 h-16 bg-white/10 rounded-full mx-auto mb-4 flex items-center justify-center border border-white/20 shadow-inner backdrop-blur-md">
-                    <Settings className="text-white animate-spin-slow" size={32} />
-                </div>
-                <h2 className="text-2xl font-serif font-bold text-white tracking-widest drop-shadow-md">SETTINGS</h2>
-                <p className="text-white/60 text-xs font-serif mt-1 italic">Manage your Renqing preferences</p>
-            </div>
-        </div>
-
-        {/* The Seal */}
-        <div className="absolute top-[210px] left-1/2 -translate-x-1/2 w-20 h-20 bg-[#b01010] rounded-full shadow-[0_6px_15px_rgba(0,0,0,0.3)] z-30 flex items-center justify-center border border-[#d11515]">
-           <div className="w-16 h-16 rounded-full bg-[#c21414] opacity-40 flex items-center justify-center">
-               <span className="text-[10px] font-bold text-black/20 uppercase tracking-widest">Setup</span>
-           </div>
-        </div>
-
-        {/* --- Settings List --- */}
-        <div className="flex-1 overflow-y-auto pt-16 pb-8 px-4 z-10 custom-scrollbar space-y-1">
-            
-            {/* Daily Reminder */}
-            <div className="rounded-t-xl overflow-hidden">
-                <SettingCard 
-                    icon={<Bell size={18} />} 
-                    label="Daily Reminder"
-                    onClick={() => setReminderEnabled(!reminderEnabled)}
-                >
-                    <button className="text-gold-coin transition-all hover:scale-110">
-                        {reminderEnabled ? <ToggleRight size={32} /> : <ToggleLeft size={32} className="text-white/30" />}
-                    </button>
-                </SettingCard>
-            </div>
-
-            {/* Preferences */}
-            <SettingCard 
-                icon={<Settings size={18} />} 
-                label="Preferences"
-            >
-                <ChevronRight size={18} className="text-white/40" />
-            </SettingCard>
-
-            {/* Default Currency */}
-            <SettingCard 
-                icon={<Coins size={18} />} 
-                label="Default Currency"
-            >
-                <span className="font-mono text-xs font-bold bg-black/20 text-white/80 px-2 py-1 rounded border border-white/10">
-                    CNY (¥)
-                </span>
-            </SettingCard>
-
-            {/* Rating */}
-            <div className="rounded-b-xl overflow-hidden">
-                 <div className="bg-black/10 border-b border-white/5 p-4 flex flex-col gap-2">
-                    <div className="flex items-center gap-3 text-white/90">
-                        <span className="text-gold-coin opacity-80"><Star size={18} /></span>
-                        <span className="font-serif font-bold text-sm tracking-wide">Rate App</span>
-                    </div>
-                    <div className="flex justify-center gap-2 mt-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                            <button 
-                                key={star}
-                                onClick={() => setRating(star)}
-                                className="hover:scale-125 transition-transform"
-                            >
-                                <Star 
-                                    size={20} 
-                                    className={`${star <= rating ? 'fill-gold-coin text-gold-coin' : 'text-white/20'}`} 
-                                />
-                            </button>
-                        ))}
-                    </div>
+             {/* Header Content */}
+             <div className="relative z-10 p-6 pt-10 flex flex-col items-center">
+                 <div className="w-16 h-16 bg-gold-coin rounded-full flex items-center justify-center shadow-lg mb-3 border-4 border-[#cf1515]">
+                    <SettingsIcon className="text-[#8B0000]" size={32} />
                  </div>
+                 <h2 className="font-serif font-bold text-xl text-white tracking-widest uppercase text-shadow-sm">Settings</h2>
+             </div>
+
+             {/* Close Button - Added rotation animation */}
+             <button 
+                onClick={onClose} 
+                className="absolute top-4 right-4 text-white/60 hover:text-white hover:rotate-90 transition-all z-50 p-2 hover:bg-white/10 rounded-full"
+             >
+                <X size={24} />
+             </button>
+        </div>
+
+        {/* --- Content Area --- */}
+        <div className="p-6 space-y-6 relative">
+            
+            {/* 1. Daily Reminder */}
+            <div 
+                className="bg-black/10 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-black/20 transition-colors border border-white/5"
+                onClick={() => setReminderEnabled(!reminderEnabled)}
+            >
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gold-coin">
+                        <Bell size={16} />
+                    </div>
+                    <span className="font-serif text-white font-bold text-sm tracking-wide">Daily Reminder</span>
+                </div>
+                <button className={`transition-colors ${reminderEnabled ? 'text-green-400' : 'text-white/30'}`}>
+                    {reminderEnabled ? <ToggleRight size={32} /> : <ToggleLeft size={32} />}
+                </button>
             </div>
 
-            {/* Footer Info */}
-            <div className="mt-8 text-center opacity-40">
-                <p className="text-[10px] text-white font-mono uppercase tracking-widest">Version 1.0.0</p>
-                <p className="text-[10px] text-white font-serif mt-1">Fenzi Qian &copy; 2024</p>
+            {/* 2. Preferences */}
+            <div className="bg-black/10 rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-black/20 transition-colors border border-white/5 group">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gold-coin">
+                        <SettingsIcon size={16} />
+                    </div>
+                    <span className="font-serif text-white font-bold text-sm tracking-wide">Preferences</span>
+                </div>
+                <ChevronRight size={20} className="text-white/30 group-hover:translate-x-1 transition-transform" />
             </div>
-            
+
+            {/* 3. Rating */}
+            <div className="bg-black/10 rounded-xl p-4 space-y-2 border border-white/5 relative overflow-hidden">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gold-coin">
+                        <Star size={16} />
+                    </div>
+                    <span className="font-serif text-white font-bold text-sm tracking-wide">Rating</span>
+                </div>
+                <div className="flex gap-1 pl-11">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                        <Star 
+                            key={star} 
+                            size={18} 
+                            onClick={() => handleRating(star)}
+                            className={`cursor-pointer transition-all hover:scale-110 ${star <= rating ? 'text-gold-coin fill-gold-coin' : 'text-white/30 hover:text-white'}`} 
+                        />
+                    ))}
+                </div>
+                
+                {/* Thank You Animation Overlay */}
+                {showThankYou && (
+                    <div className="absolute inset-0 bg-[#cf1515]/95 flex items-center justify-center z-10 animate-in fade-in duration-300">
+                        <span className="font-serif font-bold text-gold-coin tracking-widest text-sm animate-bounce">
+                            THANK YOU!
+                        </span>
+                    </div>
+                )}
+            </div>
+
+            {/* 4. Default Currency */}
+            <div className="bg-black/10 rounded-xl p-4 flex items-center justify-between border border-white/5">
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-gold-coin">
+                        <Banknote size={16} />
+                    </div>
+                    <span className="font-serif text-white font-bold text-sm tracking-wide">Currency</span>
+                </div>
+                <div className="relative">
+                    <select 
+                        value={currency}
+                        onChange={(e) => setCurrency(e.target.value)}
+                        className="font-mono font-bold text-gold-coin bg-black/20 pl-3 pr-2 py-1 rounded text-xs border-none outline-none cursor-pointer hover:bg-black/30 transition-colors text-right appearance-none"
+                    >
+                        <option value="CNY">CNY (¥)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="JPY">JPY (¥)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="HKD">HKD ($)</option>
+                    </select>
+                </div>
+            </div>
+
         </div>
-        
-        {/* Bottom Shadow Gradient */}
-        <div className="absolute bottom-0 w-full h-12 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+
+        {/* Decorative Bottom */}
+        <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
 
       </div>
     </>

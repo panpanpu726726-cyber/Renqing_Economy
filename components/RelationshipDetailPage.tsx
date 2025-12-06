@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import { GiftEvent, TransactionType } from '../types';
 import { getCategory } from '../utils';
 
@@ -205,13 +205,13 @@ export const RelationshipDetailPage: React.FC<RelationshipDetailPageProps> = ({ 
     <div className="w-screen h-screen bg-[#B11414] flex flex-col relative overflow-hidden font-serif">
       
       {/* Header */}
-      <div className="h-24 bg-[#951111] w-full flex items-center px-6 shadow-md z-20 shrink-0 border-b border-[#7a0e0e]">
+      <div className="h-24 bg-[#951111] w-full flex items-center px-6 shadow-md z-20 shrink-0 border-b border-[#7a0e0e] relative">
+        {/* Close Button - Top Right */}
         <button 
           onClick={onBack}
-          className="text-white hover:bg-white/10 p-2 rounded-full transition-colors flex items-center gap-2 group"
+          className="absolute right-6 text-white/80 hover:text-white hover:rotate-90 transition-all p-2"
         >
-          <ArrowLeft size={28} className="group-hover:-translate-x-1 transition-transform"/>
-          <span className="font-serif font-bold text-lg tracking-wide">Back</span>
+          <X size={32} />
         </button>
       </div>
 

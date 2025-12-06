@@ -90,9 +90,10 @@ function App() {
 
   const handleNavigate = (page: Page) => {
     if (page === Page.SETTINGS) {
-      setIsSettingsDrawerOpen(true);
-      setIsNavOpen(false);
-      return;
+        setIsNavOpen(false); // Close main nav
+        // Use a small timeout to allow nav to close smoothly before opening settings, or just open immediately
+        setTimeout(() => setIsSettingsDrawerOpen(true), 200);
+        return;
     }
     setCurrentPage(page);
     setIsNavOpen(false);
@@ -247,6 +248,8 @@ function App() {
       {/* --- Drawers & Modals --- */}
       <Navigation isOpen={isNavOpen} onClose={() => setIsNavOpen(false)} onNavigate={handleNavigate} />
       
+      <SettingsDrawer isOpen={isSettingsDrawerOpen} onClose={() => setIsSettingsDrawerOpen(false)} />
+
       <EmotionalOverview 
         isOpen={isOverviewOpen} 
         onClose={() => setIsOverviewOpen(false)} 
@@ -262,11 +265,6 @@ function App() {
         onClose={() => setIsSearchDrawerOpen(false)}
         currentFilters={filters}
         onApplyFilters={setFilters}
-      />
-
-      <SettingsDrawer 
-        isOpen={isSettingsDrawerOpen}
-        onClose={() => setIsSettingsDrawerOpen(false)}
       />
 
       <AddEventModal 

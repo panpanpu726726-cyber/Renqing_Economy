@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, FolderOpen, ArrowDownCircle, ArrowUpCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, FolderOpen, ArrowDownCircle, ArrowUpCircle, ExternalLink, X } from 'lucide-react';
 import { GiftEvent, TransactionType, Page } from '../types';
 
 interface RelationshipLedgerPageProps {
@@ -27,17 +28,18 @@ export const RelationshipLedgerPage: React.FC<RelationshipLedgerPageProps> = ({ 
     <div className="w-screen h-screen bg-[#B11414] flex flex-col relative overflow-hidden">
       
       {/* Top Header */}
-      <div className="h-24 bg-[#951111] w-full flex items-center px-6 shadow-md z-20 shrink-0 border-b border-[#7a0e0e]">
-        <button 
-          onClick={onBack}
-          className="text-white hover:bg-white/10 p-2 rounded-full transition-colors flex items-center gap-2"
-        >
-          <ArrowLeft size={28} />
-          <span className="font-serif font-bold text-lg tracking-wide">Back to Table</span>
-        </button>
-        <h1 className="ml-auto text-gold-coin font-serif font-bold text-2xl tracking-widest flex items-center gap-3">
+      <div className="h-24 bg-[#951111] w-full flex items-center px-6 shadow-md z-20 shrink-0 border-b border-[#7a0e0e] relative">
+        <h1 className="text-gold-coin font-serif font-bold text-2xl tracking-widest flex items-center gap-3">
           <FolderOpen className="text-gold-coin" /> RELATIONSHIP LEDGER
         </h1>
+        
+        {/* Close Button - Top Right */}
+        <button 
+          onClick={onBack}
+          className="absolute right-6 text-white/80 hover:text-white hover:rotate-90 transition-all p-2"
+        >
+          <X size={32} />
+        </button>
       </div>
 
       {/* Main Content: The Archive Scene */}

@@ -41,10 +41,10 @@ export const Navigation: React.FC<NavigationProps> = ({ isOpen, onClose, onNavig
             {/* The Curve - Creating the flap shape */}
             <div className="absolute bottom-[-30px] left-0 w-full h-[60px] bg-[#ff5e57] rounded-b-[100%] shadow-sm z-10"></div>
             
-            {/* Close Button */}
+            {/* Close Button - Moved to Top Right */}
             <button 
                 onClick={onClose} 
-                className="absolute top-6 left-6 text-white/70 hover:text-white hover:rotate-90 transition-all z-50"
+                className="absolute top-6 right-6 text-white/70 hover:text-white hover:rotate-90 transition-all z-50"
             >
                 <X size={28} />
             </button>
