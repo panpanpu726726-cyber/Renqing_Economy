@@ -29,3 +29,21 @@ export const getCategory = (name: string, occasion: string): string => {
   if (o.includes('bribe') || o.includes('secret') || o.includes('vip')) return 'Special';
   return 'General'; // Default to General Social Acquaintances
 };
+
+/**
+ * Maps person names to the 6 local images provided in the root directory.
+ * Based on user requested mapping.
+ */
+export const getProfileImage = (person: string): string | null => {
+  const p = person.toLowerCase();
+  if (!p) return null;
+
+  if (p.includes('zhang') || p.includes('auntie')) return "1.jpeg";
+  if (p.includes('wang') || p.includes('boss')) return "2.png";
+  if (p.includes('jen') || p.includes('colleague')) return "3.png";
+  if (p.includes('li') || p.includes('cousin')) return "4.png";
+  if (p.includes('nephew')) return "5.png";
+  if (p.includes('classmate')) return "6.png";
+  
+  return null;
+};

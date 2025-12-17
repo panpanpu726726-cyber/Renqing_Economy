@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { X, ArrowRight, AlertTriangle, Activity, Share2 } from 'lucide-react';
+
+import React, { useState, useEffect } from 'react';
+import { X, ArrowRight, AlertTriangle, Activity, Share2, Award, Loader2, Sparkles } from 'lucide-react';
 import { GiftEvent } from '../types';
 import { CATEGORIES, getCategory } from '../utils';
+import { generateRenqingRanking } from '../services/geminiService';
 
 interface EmotionalOverviewProps {
   isOpen: boolean;
@@ -14,6 +16,9 @@ export const EmotionalOverview: React.FC<EmotionalOverviewProps> = ({ isOpen, on
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
+  
+  const [ranking, setRanking] = useState<{ title: string; analysis: string } | null>(null);
+  const [isLoadingRanking, setIsLoadingRanking] = useState(false);
 
   // --- Data Prep for Charts ---
   const sortedEvents = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).slice(-7);
@@ -30,6 +35,20 @@ export const EmotionalOverview: React.FC<EmotionalOverviewProps> = ({ isOpen, on
           processedPeople.add(e.person);
       }
   });
+
+  // Fetch AI Ranking when opened
+  useEffect(() => {
+    if (isOpen && events.length > 0 && !ranking) {
+      handleGenerateRanking();
+    }
+  }, [isOpen]);
+
+  const handleGenerateRanking = async () => {
+    setIsLoadingRanking(true);
+    const res = await generateRenqingRanking(events);
+    setRanking(res);
+    setIsLoadingRanking(false);
+  };
 
   const getCurvePath = (data: typeof sortedEvents, width: number, height: number) => {
     if (data.length === 0) return "";
@@ -58,10 +77,10 @@ export const EmotionalOverview: React.FC<EmotionalOverviewProps> = ({ isOpen, on
         onClick={onClose}
       />
       
-      {/* Drawer - Matching Navigation Style (#cf1515) */}
+      {/* Drawer */}
       <div className={`fixed top-0 right-0 h-full w-96 bg-[#cf1515] z-50 shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-transform duration-300 ease-in-out border-l border-[#ff5e57] overflow-hidden flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         
-        {/* Header - Lighter Red */}
+        {/* Header */}
         <div className="p-6 bg-[#ff5e57] flex justify-between items-center shrink-0 shadow-sm relative z-20">
           <h2 className="text-xl font-serif font-bold text-gold-coin tracking-widest flex items-center gap-2 drop-shadow-md">
             <Activity size={22} className="text-gold-coin" /> Emotional Snapshot
@@ -69,14 +88,52 @@ export const EmotionalOverview: React.FC<EmotionalOverviewProps> = ({ isOpen, on
           <button onClick={onClose} className="hover:rotate-90 transition-transform duration-300 text-white/80 hover:text-white">
             <X size={28} />
           </button>
-          {/* Decorative Curve */}
           <div className="absolute -bottom-3 left-0 w-full h-3 bg-[#ff5e57] rounded-b-[50%] z-10"></div>
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-8 custom-scrollbar pt-8">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar pt-8">
           
-          {/* --- A. Stress Curve --- */}
+          {/* AI Ranking Section - "The Stamp of Fate" */}
+          <div className="relative group overflow-hidden bg-gradient-to-br from-[#8b0000] to-[#5c0e0e] border-2 border-gold-coin/30 rounded-2xl p-5 shadow-2xl">
+              <div className="absolute top-[-10px] right-[-10px] opacity-10 rotate-12">
+                  <Award size={100} className="text-gold-coin" />
+              </div>
+
+              {isLoadingRanking ? (
+                <div className="flex flex-col items-center justify-center py-6 space-y-3">
+                   <Loader2 className="animate-spin text-gold-coin" size={32} />
+                   <p className="text-xs text-gold-accent font-serif italic">Consulting the Grandmaster of Etiquette...</p>
+                </div>
+              ) : ranking ? (
+                <div className="relative z-10 animate-in fade-in slide-in-from-top-2 duration-700">
+                    <div className="flex items-center gap-3 mb-2">
+                        <Award size={20} className="text-gold-coin" />
+                        <span className="text-[10px] font-bold text-gold-accent uppercase tracking-[0.2em]">Social Standing</span>
+                    </div>
+                    <h3 className="text-2xl font-serif font-bold text-white mb-2 leading-tight drop-shadow-sm">
+                        {ranking.title}
+                    </h3>
+                    <p className="text-xs text-red-100 font-serif leading-relaxed italic opacity-90 border-l-2 border-gold-coin/50 pl-3">
+                        "{ranking.analysis}"
+                    </p>
+                    <button 
+                      onClick={handleGenerateRanking}
+                      className="mt-4 flex items-center gap-1 text-[9px] text-gold-coin/60 hover:text-gold-coin transition-colors uppercase font-bold tracking-widest"
+                    >
+                      <Sparkles size={10} /> Re-evaluate Status
+                    </button>
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                    <button onClick={handleGenerateRanking} className="bg-gold-coin text-[#8B0000] px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-widest">
+                        Generate Ranking
+                    </button>
+                </div>
+              )}
+          </div>
+
+          {/* Stress Curve */}
           <div className="relative group">
             <div className="flex justify-between items-end mb-3">
                 <h3 className="font-serif font-bold text-white text-sm uppercase tracking-wide opacity-90">Stress Trajectory</h3>
@@ -115,12 +172,9 @@ export const EmotionalOverview: React.FC<EmotionalOverviewProps> = ({ isOpen, on
                     </div>
                 )}
             </div>
-            <button onClick={onNavigateToDetails} className="w-full mt-2 text-xs text-gold-accent hover:text-white transition-colors flex items-center justify-end gap-1 font-bold tracking-wide">
-                View Full Analysis <ArrowRight size={12}/>
-            </button>
           </div>
 
-          {/* --- B. Network Map (Hierarchical) --- */}
+          {/* Relationship Web */}
           <div>
              <div className="flex justify-between items-end mb-3">
                 <h3 className="font-serif font-bold text-white text-sm uppercase tracking-wide opacity-90">Relationship Web</h3>
@@ -169,19 +223,16 @@ export const EmotionalOverview: React.FC<EmotionalOverviewProps> = ({ isOpen, on
                     })}
                 </svg>
             </div>
-             <button onClick={onNavigateToDetails} className="w-full mt-2 text-xs text-gold-accent hover:text-white transition-colors flex items-center justify-end gap-1 font-bold tracking-wide">
-                Explore Connections <ArrowRight size={12}/>
-            </button>
           </div>
 
-          {/* --- C. Alerts --- */}
+          {/* Alerts */}
           <div className="bg-[#951111]/40 border border-red-500/30 rounded-xl p-5 relative overflow-hidden backdrop-blur-sm shadow-lg">
              <div className="flex items-start gap-4 relative z-10">
                 <div className="bg-red-600 text-white p-2.5 rounded-lg shrink-0 animate-bounce shadow-lg border border-red-400">
                     <AlertTriangle size={24} />
                 </div>
                 <div>
-                    <h4 className="font-bold text-white text-base tracking-wide">Approaching Debt Horizon</h4>
+                    <h4 className="font-bold text-white text-base tracking-wide">Debt Horizon</h4>
                     <p className="text-sm text-gray-200 mt-1 leading-snug">
                         Warning: <span className="font-bold text-gold-coin">Spring Festival</span> is in 34 days.
                         Est. social cost: <span className="font-mono font-bold text-red-300">¥5,000+</span>.
