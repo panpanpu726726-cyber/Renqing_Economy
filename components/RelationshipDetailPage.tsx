@@ -170,7 +170,7 @@ export const RelationshipDetailPage: React.FC<RelationshipDetailPageProps> = ({ 
   const getProfileImage = () => {
     // 1. Auntie Zhang / Elders (Female) - Asian, middle-aged/elderly woman, half body portrait
     if (person.includes('Zhang') || person.includes('Aunt') || (category === 'Elders' && !person.includes('Uncle'))) {
-        return "https://raw.githubusercontent.com/panpanpu/Renqing_Economy/main/services/1.png"; 
+        return "https://raw.githubusercontent.com/panpanpu/Renqing_Economy/main/services/1.jpeg"; 
     }
     
     // 2. Uncle / Boss / Father (Male) - Asian, elderly/middle-aged man, half body
