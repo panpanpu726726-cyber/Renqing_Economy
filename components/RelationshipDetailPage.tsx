@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, X } from 'lucide-react';
+import { X, AlertCircle, TrendingUp, Heart, Info } from 'lucide-react';
 import { GiftEvent, TransactionType } from '../types';
 import { getCategory, getProfileImage } from '../utils';
 
@@ -11,9 +11,11 @@ interface RelationshipDetailPageProps {
   isCreateMode?: boolean;
 }
 
-export const RelationshipDetailPage: React.FC<RelationshipDetailPageProps> = ({ person, events, onBack, isCreateMode = false }) => {
+export const RelationshipDetailPage: React.FC<RelationshipDetailPageProps> = ({ person, events, onBack }) => {
   const [activeTab, setActiveTab] = useState<'GIVING' | 'RECEIVING'>('GIVING');
+  const [imgError, setImgError] = useState(false);
 
+  // --- Logic: Data Processing ---
   const augmentedEvents = useMemo(() => {
     let baseEvents = [...events];
     const category = events.length > 0 ? getCategory(person, events[0].occasion) : getCategory(person, '');
@@ -21,134 +23,155 @@ export const RelationshipDetailPage: React.FC<RelationshipDetailPageProps> = ({ 
     let expenses = baseEvents.filter(e => e.type === TransactionType.EXPENSE);
     let incomes = baseEvents.filter(e => e.type === TransactionType.INCOME);
 
-    const getOccasion = (type: TransactionType, category: string) => {
-        const isExpense = type === TransactionType.EXPENSE;
-        const list = isExpense 
-          ? ['Wedding Banquet', 'Housewarming', 'New Year Gift', 'Elder Birthday', 'Hospital Visit'] 
-          : ['New Year Gift', 'My Wedding', 'Return Gift'];
-        return list[Math.floor(Math.random() * list.length)];
-    };
-    
-    const getCynicalAnalysis = () => {
-        const descriptions = ['Buying "Face" (Mianzi).', 'A mandatory social tax.', 'Investing in a low-dividend bond.', 'Performative generosity.', 'Strategic payment.'];
-        return descriptions[Math.floor(Math.random() * descriptions.length)];
-    };
+    const createSynthetic = (type: TransactionType, i: number) => ({
+      id: `syn-${type}-${i}`,
+      person,
+      amount: category === 'Core Family' ? 1000 : 500,
+      date: `2023-0${i + 1}-15`,
+      type,
+      occasion: type === TransactionType.EXPENSE ? 'Wedding Gift' : 'New Year Red Packet',
+      aiAnalysis: 'A calculated move in the game of social face.'
+    });
 
-    const getLuckyAmount = (category: string) => {
-        if (category === 'Core Family') return 2000;
-        return 600;
-    };
-
-    const createSynthetic = (type: TransactionType, indexOffset: number) => {
-        const d = new Date();
-        d.setMonth(d.getMonth() - (indexOffset * 2 + 1));
-        return {
-            id: `syn-${type}-${Math.random()}`,
-            person,
-            amount: getLuckyAmount(category),
-            date: d.toISOString().split('T')[0],
-            type,
-            occasion: getOccasion(type, category),
-            aiAnalysis: getCynicalAnalysis()
-        } as GiftEvent;
-    };
-
-    while (expenses.length < 3) expenses.push(createSynthetic(TransactionType.EXPENSE, expenses.length));
-    while (incomes.length < 3) incomes.push(createSynthetic(TransactionType.INCOME, incomes.length));
+    while (expenses.length < 2) expenses.push(createSynthetic(TransactionType.EXPENSE, expenses.length));
+    while (incomes.length < 2) incomes.push(createSynthetic(TransactionType.INCOME, incomes.length));
     
     return [...expenses, ...incomes].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [events, person]);
 
-  const totalGiven = augmentedEvents.filter(e => e.type === TransactionType.EXPENSE).reduce((sum, e) => sum + e.amount, 0);
-  const totalReceived = augmentedEvents.filter(e => e.type === TransactionType.INCOME).reduce((sum, e) => sum + e.amount, 0);
+  const displayEvents = useMemo(() => {
+    return augmentedEvents.filter(e => e.type === (activeTab === 'GIVING' ? TransactionType.EXPENSE : TransactionType.INCOME));
+  }, [augmentedEvents, activeTab]);
+
+  const totalGiven = augmentedEvents.filter(e => e.type === TransactionType.EXPENSE).reduce((s, e) => s + e.amount, 0);
+  const totalReceived = augmentedEvents.filter(e => e.type === TransactionType.INCOME).reduce((s, e) => s + e.amount, 0);
   const balance = totalReceived - totalGiven;
-  const category = augmentedEvents.length > 0 ? getCategory(person, augmentedEvents[0].occasion) : 'General';
+  const pressureLevel = Math.min(Math.abs(balance) / 50, 100);
 
-  const filteredEvents = augmentedEvents.filter(e => {
-    if (activeTab === 'GIVING') return e.type === TransactionType.EXPENSE;
-    if (activeTab === 'RECEIVING') return e.type === TransactionType.INCOME;
-    return true;
-  });
-
-  const portrait = getProfileImage(person) || "1.jpeg";
-
-  const Field = ({ label, value, isMoney = false }: { label: string, value: React.ReactNode, isMoney?: boolean }) => (
-    <fieldset className="border-[2px] border-white/80 rounded-lg px-4 pb-3 pt-1 bg-transparent hover:bg-white/5 transition-colors group w-full relative">
-       <legend className="text-xs text-white px-2 font-bold tracking-wider ml-1">
-          {label}
-       </legend>
-       <div className="-mt-1">
-           {isMoney ? (
-              <div className="text-white font-mono font-bold text-xl leading-tight tracking-wide">{value}</div>
-           ) : (
-              <div className="text-white font-serif font-bold text-lg leading-tight">{value}</div>
-           )}
-       </div>
-    </fieldset>
-  );
+  const portrait = getProfileImage(person);
 
   return (
-    <div className="w-screen h-screen bg-[#B11414] flex flex-col relative overflow-hidden font-serif">
-      <div className="h-24 bg-[#951111] w-full flex items-center px-6 shadow-md z-20 shrink-0 border-b border-[#7a0e0e] relative">
-        <button onClick={onBack} className="absolute right-6 text-white/80 hover:text-white hover:rotate-90 transition-all p-2">
-          <X size={32} />
-        </button>
+    <div className="w-screen h-screen bg-[#B11414] flex flex-col font-serif overflow-hidden">
+      {/* Header */}
+      <div className="h-20 bg-[#951111] flex items-center justify-between px-6 border-b border-[#7a0e0e] z-30 shadow-lg">
+        <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gold-coin rounded-full flex items-center justify-center text-[#8B0000] font-bold border-2 border-yellow-200">¥</div>
+            <h1 className="text-white font-bold text-xl tracking-widest">人情档案 / {person}</h1>
+        </div>
+        <button onClick={onBack} className="text-white/70 hover:text-white transition-all p-2"><X size={32} /></button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 lg:p-10 custom-scrollbar">
-         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="flex flex-col items-center lg:items-start space-y-6">
-                    <div className="aspect-[3/4] w-full max-w-[220px] overflow-hidden rounded-xl shadow-2xl border-4 border-white/10 bg-[#fdfbf7] shrink-0 self-center lg:self-start">
-                      <img src={portrait} alt={person} className="w-full h-full object-cover" />
-                    </div>
+      <div className="flex-1 overflow-y-auto p-6 lg:p-12 custom-scrollbar">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+          
+          {/* Left: Identity & Pressure */}
+          <div className="lg:col-span-4 space-y-8">
+            <div className="relative group">
+                <div className="aspect-[3/4] w-full bg-[#fdfbf7] rounded-2xl shadow-2xl border-4 border-white/20 overflow-hidden relative">
+                    {!imgError && portrait ? (
+                        <img 
+                            src={portrait} 
+                            onError={() => setImgError(true)} 
+                            className="w-full h-full object-cover" 
+                            alt={person} 
+                        />
+                    ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300">
+                            <span className="text-6xl font-bold text-gray-400 opacity-50">{person.charAt(0)}</span>
+                            <p className="text-[10px] text-gray-400 mt-2 uppercase font-bold tracking-tighter">Portrait Unavailable</p>
+                        </div>
+                    )}
+                    <div className="absolute inset-0 border-[12px] border-white/10 pointer-events-none"></div>
                 </div>
-
-                <div className="space-y-6">
-                    <h1 className="text-white font-serif font-bold text-4xl tracking-wide leading-none drop-shadow-md">{person}</h1>
-                    <div className="bg-[#a65d5d] rounded-2xl p-6 shadow-xl border border-white/10 text-white space-y-5">
-                        <div className="text-center pb-2 border-b border-white/20">
-                            <h3 className="font-serif font-bold text-lg text-white/90 tracking-widest uppercase">Summary</h3>
-                        </div>
-                        <div className="space-y-4 font-mono text-sm">
-                            <div className="flex justify-between items-center text-yellow-300 font-bold bg-black/10 p-2 rounded">
-                                <span>RECEIVING</span>
-                                <span>+ ¥{totalReceived}</span>
-                            </div>
-                            <div className="flex justify-between items-center text-white/90 bg-black/10 p-2 rounded">
-                                <span>GIVING</span>
-                                <span>- ¥{totalGiven}</span>
-                            </div>
-                            <div className="flex justify-between items-center pt-3 border-t border-white/20 text-xl font-bold">
-                                <span>Net</span>
-                                <span className={balance >= 0 ? "text-yellow-300" : "text-white"}>
-                                    {balance >= 0 ? '+' : ''} ¥{Math.abs(balance)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                {/* Satirical Stamp */}
+                <div className="absolute -bottom-4 -right-4 w-24 h-24 border-4 border-red-600/30 rounded-full flex items-center justify-center -rotate-12 pointer-events-none">
+                    <span className="text-red-600/30 font-bold text-xs text-center leading-tight uppercase">Social<br/>Bonded</span>
                 </div>
             </div>
 
-            <div className="lg:col-span-6 space-y-6">
-                <div className="flex gap-4 p-1 bg-black/10 rounded-xl border border-white/5">
-                    <button onClick={() => setActiveTab('GIVING')} className={`flex-1 py-4 rounded-lg font-bold uppercase tracking-widest transition-all ${activeTab === 'GIVING' ? 'bg-[#991b1b] text-white border-[#ef4444] border-2 shadow-lg' : 'text-white/60'}`}>GIVING</button>
-                    <button onClick={() => setActiveTab('RECEIVING')} className={`flex-1 py-4 rounded-lg font-bold uppercase tracking-widest transition-all ${activeTab === 'RECEIVING' ? 'bg-[#b45309] text-gold-coin border-gold-coin border-2 shadow-lg' : 'text-white/60'}`}>RECEIVING</button>
+            {/* Renqing Pressure Meter */}
+            <div className="bg-black/20 rounded-2xl p-6 border border-white/10 space-y-4 shadow-inner">
+                <div className="flex justify-between items-center">
+                    <h3 className="text-gold-accent text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                        <TrendingUp size={14} /> 人情压力指数
+                    </h3>
+                    <span className="text-white font-mono text-sm">{Math.round(pressureLevel)}%</span>
                 </div>
+                <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
+                    <div 
+                        className="h-full bg-gradient-to-r from-yellow-500 via-orange-500 to-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] transition-all duration-1000"
+                        style={{ width: `${pressureLevel}%` }}
+                    ></div>
+                </div>
+                <p className="text-[11px] text-red-200 italic opacity-80 leading-relaxed">
+                    {balance < 0 
+                        ? "警告：你目前处于人情赤字状态。在该联系人面前，你的“面子”正在贬值。" 
+                        : "提示：你的人情盈余较高。这虽然能带来面子，但也意味着你的资金流动性被锁死在了无效社交中。"}
+                </p>
+            </div>
+          </div>
 
-                <div className="space-y-4 h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar pr-2">
-                    {filteredEvents.map(event => (
-                        <div key={event.id} className="bg-[#d9d9d9]/10 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-lg space-y-5">
-                             <div className="space-y-4">
-                                <Field label="Occasion" value={event.occasion} />
-                                <Field label="Date" value={event.date} />
-                                <Field label="Amount" value={`¥ ${event.amount}`} isMoney />
-                             </div>
-                        </div>
-                    ))}
+          {/* Right: Ledger Details */}
+          <div className="lg:col-span-8 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/10 p-4 rounded-xl border border-white/5 flex flex-col items-center">
+                    <span className="text-white/60 text-[10px] uppercase font-bold mb-1">Total Harvested</span>
+                    <span className="text-2xl font-bold text-green-400 font-mono">¥{totalReceived}</span>
+                </div>
+                <div className="bg-white/10 p-4 rounded-xl border border-white/5 flex flex-col items-center">
+                    <span className="text-white/60 text-[10px] uppercase font-bold mb-1">Total Sown</span>
+                    <span className="text-2xl font-bold text-red-400 font-mono">¥{totalGiven}</span>
                 </div>
             </div>
-         </div>
+
+            <div className="flex p-1 bg-black/20 rounded-xl border border-white/5">
+                <button 
+                    onClick={() => setActiveTab('GIVING')} 
+                    className={`flex-1 py-3 rounded-lg font-bold text-xs uppercase tracking-widest transition-all ${activeTab === 'GIVING' ? 'bg-[#991b1b] text-white shadow-lg' : 'text-white/40 hover:text-white/60'}`}
+                >
+                    支出 (Debt Paid)
+                </button>
+                <button 
+                    onClick={() => setActiveTab('RECEIVING')} 
+                    className={`flex-1 py-3 rounded-lg font-bold text-xs uppercase tracking-widest transition-all ${activeTab === 'RECEIVING' ? 'bg-[#b45309] text-gold-coin shadow-lg' : 'text-white/40 hover:text-white/60'}`}
+                >
+                    收入 (Debt Collected)
+                </button>
+            </div>
+
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                {displayEvents.map(event => (
+                    <div key={event.id} className="bg-white/5 border border-white/10 rounded-xl p-5 hover:bg-white/10 transition-all group relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-gold-coin opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <div className="flex justify-between items-start mb-3">
+                            <div>
+                                <h4 className="text-white font-bold text-lg">{event.occasion}</h4>
+                                <p className="text-[10px] text-white/50 font-mono uppercase tracking-widest">{event.date}</p>
+                            </div>
+                            <div className={`text-xl font-bold font-mono ${event.type === TransactionType.INCOME ? 'text-green-400' : 'text-red-400'}`}>
+                                {event.type === TransactionType.INCOME ? '+' : '-'} ¥{event.amount}
+                            </div>
+                        </div>
+                        {event.aiAnalysis && (
+                            <div className="bg-black/20 p-3 rounded-lg border-l-2 border-gold-coin/50">
+                                <p className="text-xs text-red-100 italic font-serif leading-relaxed opacity-90">
+                                    "{event.aiAnalysis}"
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      {/* Footer Quote */}
+      <div className="p-4 bg-black/30 text-center border-t border-white/5">
+        <p className="text-[10px] text-gold-accent font-serif tracking-widest uppercase opacity-60">
+          "人情似纸张张薄，世事如棋局局新"
+        </p>
       </div>
     </div>
   );

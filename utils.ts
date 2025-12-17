@@ -17,6 +17,26 @@ export const OCCASIONS = [
   'Others'
 ];
 
+/**
+ * Maps person names to the 6 local images.
+ * Assuming they are accessible from the root (e.g., /1.jpeg).
+ */
+export const getProfileImage = (person: string): string | null => {
+  const p = person.toLowerCase();
+  if (!p) return null;
+
+  // 根据人名关键词匹配图片
+  if (p.includes('zhang') || p.includes('auntie')) return "/1.jpeg";
+  if (p.includes('wang') || p.includes('boss')) return "/2.png";
+  if (p.includes('jen') || p.includes('colleague')) return "/3.png";
+  if (p.includes('li') || p.includes('cousin')) return "/4.png";
+  if (p.includes('nephew')) return "/5.png";
+  if (p.includes('classmate')) return "/6.png";
+  
+  // 默认回退到第一张
+  return "/1.jpeg";
+};
+
 // Helper to categorize people based on name or occasion keywords
 export const getCategory = (name: string, occasion: string): string => {
   const n = name.toLowerCase();
@@ -27,23 +47,5 @@ export const getCategory = (name: string, occasion: string): string => {
   if (n.includes('aunt') || n.includes('uncle') || n.includes('grand') || n.includes('mentor') || n.includes('zhang')) return 'Elders';
   if (n.includes('friend') || n.includes('classmate') || n.includes('bestie')) return 'Close Friends';
   if (o.includes('bribe') || o.includes('secret') || o.includes('vip')) return 'Special';
-  return 'General'; // Default to General Social Acquaintances
-};
-
-/**
- * Maps person names to the 6 local images provided in the root directory.
- * Based on user requested mapping.
- */
-export const getProfileImage = (person: string): string | null => {
-  const p = person.toLowerCase();
-  if (!p) return null;
-
-  if (p.includes('zhang') || p.includes('auntie')) return "1.jpeg";
-  if (p.includes('wang') || p.includes('boss')) return "2.png";
-  if (p.includes('jen') || p.includes('colleague')) return "3.png";
-  if (p.includes('li') || p.includes('cousin')) return "4.png";
-  if (p.includes('nephew')) return "5.png";
-  if (p.includes('classmate')) return "6.png";
-  
-  return null;
+  return 'General';
 };
